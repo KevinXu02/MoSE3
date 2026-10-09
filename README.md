@@ -18,7 +18,7 @@
 
 ## Updates
 
-- **[Oct 2026]** [Art-Kubric generation code](https://github.com/mose3-tracker/Art-Kubric) released; [dataset](https://huggingface.co/datasets/mose3-tracker/Art-Kubric) upload in progress.
+- **[Oct 2026]** [Art-Kubric generation code](https://github.com/mose3-tracker/Art-Kubric) and [dataset](https://huggingface.co/datasets/mose3-tracker/Art-Kubric) released.
 - **[Oct 2026]** Inference code and model weights released.
 
 ## Overview
