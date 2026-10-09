@@ -2,10 +2,10 @@
 <h1>MoSE3: Learning World-Space SE(3) at Every Pixel</h1>
 <h3>NeurIPS 2026 (Spotlight)</h3>
 
-<a href="https://arxiv.org/abs/2610.03716"><img src="https://img.shields.io/badge/Paper-555555?style=flat-square" alt="Paper"></a>
-<a href="https://mose3-tracker.github.io/"><img src="https://img.shields.io/badge/Project-555555?style=flat-square" alt="Project"></a>
-<a href="https://huggingface.co/JoannaCCCCCC/MoSE3"><img src="https://img.shields.io/badge/Model-555555?style=flat-square" alt="Model"></a>
-<a href="https://huggingface.co/datasets/mose3-tracker/Art-Kubric"><img src="https://img.shields.io/badge/Dataset-555555?style=flat-square" alt="Dataset"></a>
+<a href="https://arxiv.org/abs/2610.03716"><img src="https://img.shields.io/badge/Paper-MoSE3-b31b1b" height="20" alt="Paper"></a>
+<a href="https://mose3-tracker.github.io/"><img src="https://img.shields.io/badge/Project_Page-green" height="20" alt="Project Page"></a>
+<a href="https://huggingface.co/JoannaCCCCCC/MoSE3"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Model-blue" height="20" alt="Model"></a>
+<a href="https://huggingface.co/datasets/mose3-tracker/Art-Kubric"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Dataset-blue" height="20" alt="Dataset"></a>
 
 [Joanna Jiahuan Cheng](https://joannaccjh.github.io/)\*, [Zhiyi Li](https://sky-lzy.github.io/)\*, [Tian Xia](https://tianx-ia.github.io/)\*, [Ruojin Cai](https://ruojincai.github.io/), [Yilun Du](https://yilundu.github.io/), [Qianqian Wang](https://qianqianwang68.github.io/)
 
