@@ -5,6 +5,7 @@
 <a href="https://arxiv.org/abs/2610.03716"><img src="https://img.shields.io/badge/Paper-MoSE3-b31b1b" alt="Paper"></a>
 <a href="https://mose3-tracker.github.io/"><img src="https://img.shields.io/badge/Project_Page-green" alt="Project Page"></a>
 <a href="https://huggingface.co/JoannaCCCCCC/MoSE3"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Model-blue" alt="Model"></a>
+<a href="https://huggingface.co/datasets/mose3-tracker/Art-Kubric"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Dataset-blue" alt="Dataset"></a>
 
 [Joanna Jiahuan Cheng](https://joannaccjh.github.io/)\*, [Zhiyi Li](https://sky-lzy.github.io/)\*, [Tian Xia](https://tianx-ia.github.io/)\*, [Ruojin Cai](https://ruojincai.github.io/), [Yilun Du](https://yilundu.github.io/), [Qianqian Wang](https://qianqianwang68.github.io/)
 
@@ -17,6 +18,7 @@
 
 ## Updates
 
+- **[Oct 2026]** [Art-Kubric generation code](https://github.com/mose3-tracker/Art-Kubric) released; [dataset](https://huggingface.co/datasets/mose3-tracker/Art-Kubric) upload in progress.
 - **[Oct 2026]** Inference code and model weights released.
 
 ## Overview
@@ -118,7 +120,7 @@ and width, and trail lengths are sliders in the GUI.
 ## Checklist
 
 - [x] Inference code and model weights
-- [ ] Art-Kubric dataset and generation pipeline
+- [x] [Art-Kubric dataset repository](https://huggingface.co/datasets/mose3-tracker/Art-Kubric) and [generation pipeline](https://github.com/mose3-tracker/Art-Kubric)
 - [ ] Evaluation code
 - [ ] Training code
 
@@ -128,7 +130,7 @@ MoSE3 uses [π³](https://github.com/yyfz/Pi3) as its frozen geometry branch, an
 includes π³'s model code and weights. It also contains code from
 [DINOv2](https://github.com/facebookresearch/dinov2), [CroCo](https://github.com/naver/croco),
 [DUSt3R](https://github.com/naver/dust3r) and [marepo](https://github.com/nianticlabs/marepo).
-The model is trained on Kubric, PointOdyssey, Dynamic Replica, SynthVerse and Syn4D. The example
+The model is trained on Art-Kubric, Kubric, PointOdyssey, Dynamic Replica, SynthVerse and Syn4D. The example
 videos are from [Pexels](https://www.pexels.com) and the [DyCheck](https://github.com/KAIR-BAIR/dycheck)
 iPhone dataset. We thank the authors of all of these.
 
