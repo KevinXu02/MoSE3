@@ -3,7 +3,7 @@
 <h3>NeurIPS 2026 (Spotlight)</h3>
 
 <a href="https://arxiv.org/abs/2610.03716"><img src="https://img.shields.io/badge/Paper-MoSE3-b31b1b" height="20" alt="Paper"></a>
-<a href="https://mose3-tracker.github.io/"><img src="https://img.shields.io/badge/Project_Page-green" height="20" alt="Project Page"></a>
+<a href="https://mose3-tracker.github.io/"><img src="https://img.shields.io/badge/Project-Website-green?logo=googlechrome&amp;logoColor=green" height="20" alt="Project Page"></a>
 <a href="https://huggingface.co/JoannaCCCCCC/MoSE3"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Model-blue" height="20" alt="Model"></a>
 <a href="https://huggingface.co/datasets/mose3-tracker/Art-Kubric"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Dataset-blue" height="20" alt="Dataset"></a>
 
