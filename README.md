@@ -4,10 +4,10 @@
 
 <a href="https://arxiv.org/abs/2610.03716"><img src="https://img.shields.io/badge/Paper-MoSE3-b31b1b" height="20" alt="Paper"></a>
 <a href="https://mose3-tracker.github.io/"><img src="https://img.shields.io/badge/Project-Website-green" height="20" alt="Project Page"></a>
-<a href="https://huggingface.co/JoannaCCCCCC/MoSE3"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Model-blue" height="20" alt="Model"></a>
+<a href="https://huggingface.co/mose3-tracker/MoSE3"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Model-blue" height="20" alt="Model"></a>
 <a href="https://huggingface.co/datasets/mose3-tracker/Art-Kubric"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Dataset-blue" height="20" alt="Dataset"></a>
 
-[Joanna Jiahuan Cheng](https://joannaccjh.github.io/)\*, [Zhiyi Li](https://sky-lzy.github.io/)\*, [Tian Xia](https://tianx-ia.github.io/)\*, [Ruojin Cai](https://ruojincai.github.io/), [Yilun Du](https://yilundu.github.io/), [Qianqian Wang](https://qianqianwang68.github.io/)
+[Jiahuan Cheng](https://joannaccjh.github.io/)\*, [Zhiyi Li](https://sky-lzy.github.io/)\*, [Tian Xia](https://tianx-ia.github.io/)\*, [Ruojin Cai](https://ruojincai.github.io/), [Yilun Du](https://yilundu.github.io/), [Qianqian Wang](https://qianqianwang68.github.io/)
 
 \* Equal contribution
 </div>
@@ -44,10 +44,10 @@ No custom CUDA extension is needed. `pip install -e .` makes `mose3` importable 
 
 ### Model weights
 
-Download the weights from [Hugging Face](https://huggingface.co/JoannaCCCCCC/MoSE3) into `ckpt/`:
+Download the weights from [Hugging Face](https://huggingface.co/mose3-tracker/MoSE3) into `ckpt/`:
 
 ```bash
-hf download JoannaCCCCCC/MoSE3 --local-dir ckpt
+hf download mose3-tracker/MoSE3 --local-dir ckpt
 ```
 
 ### Run
@@ -79,7 +79,7 @@ from mose3.models.mose3 import MoSE3
 from mose3.utils.per_point_se3 import fit_per_pixel_se3
 
 model = MoSE3.from_pretrained("ckpt", strict=True).cuda().eval()   # local folder
-# model = MoSE3.from_pretrained("JoannaCCCCCC/MoSE3", strict=True).cuda().eval()   # or straight from the Hub
+# model = MoSE3.from_pretrained("mose3-tracker/MoSE3", strict=True).cuda().eval()   # or straight from the Hub
 
 imgs = ...  # (1, N, 3, H, W) float in [0, 1]; H and W multiples of 14
 with torch.no_grad(), torch.autocast("cuda", dtype=torch.bfloat16):
@@ -137,14 +137,12 @@ iPhone dataset. We thank the authors of all of these.
 ## Citation
 
 ```bibtex
-@misc{cheng2026mose3learningworldspacese3,
-      title={MoSE3: Learning World-Space SE(3) at Every Pixel},
-      author={Jiahuan Cheng and Zhiyi Li and Tian Xia and Ruojin Cai and Yilun Du and Qianqian Wang},
-      year={2026},
-      eprint={2610.03716},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV},
-      url={https://arxiv.org/abs/2610.03716},
+@inproceedings{cheng2026mose3,
+  title     = {{MoSE3}: Learning World-Space {SE(3)} at Every Pixel},
+  author    = {Cheng, Jiahuan and Li, Zhiyi and Xia, Tian and
+               Cai, Ruojin and Du, Yilun and Wang, Qianqian},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2026}
 }
 ```
 
