@@ -126,6 +126,7 @@ def solve_rotation_horn(
 
     return {
         "R": R,
+        "quat": quat,
         "ok": ok,
         "projected_ok": projected_ok,
         "raw_eigenvalues": raw_eigenvalues,

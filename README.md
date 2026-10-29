@@ -75,6 +75,9 @@ This fork reuses query-frame fitting weights across target frames. See the
 [solver optimization and paired PRO 6000 measurements](docs/solver-weight-reuse.md).
 It also avoids repeated CUDA scalar uploads and releases temporary affinity
 buffers early; execution remains eager with the original per-frame Horn batches.
+This experimental branch directly exports the normalized Horn quaternion;
+see the [24-frame comparison](docs/solver-weight-reuse.md#direct-horn-quaternion-24-frame-experiment)
+for speed, memory and floating-point differences.
 
 ### In Python
 

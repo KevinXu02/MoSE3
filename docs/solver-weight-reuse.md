@@ -135,3 +135,48 @@ Every latency sample is uninstrumented; separate 64-frame profiler passes
 precede that length's full-pipeline samples in the same process. All raw
 repeats are retained in the analysis artifacts. Values are one-clip paired
 measurements on one PRO 6000, not a hardware-independent speed guarantee.
+
+## Direct Horn quaternion: 24-frame experiment
+
+Experimental branch `codex/direct-horn-quaternion`, based on eager-cleanup
+commit `326ea1b`. Horn already computes a canonicalized, normalized quaternion
+before building R. Return that quaternion and export it directly, retaining
+the unchanged R path for translation and finite/conditioning checks. This
+removes the quaternion-to-R-to-quaternion round trip from output generation.
+Both native eigensolves, weights, per-frame batch sizes and prior cleanups
+remain unchanged. No compiler, frame batching or packed-GEMM change is added.
+
+The test uses **exactly 24 consecutive frames**, 504 x 280, query frame 0,
+141,120 source trajectories and **3,386,880 predicted positions**. Its RGB is
+the first 24 frames of the saved consecutive DAVIS `dance-twirl` input used
+for the 50/64-frame tests. The older 23-frame every-fourth-frame MP4 is a
+different cohort. Baseline/candidate pairs share one physical RTX PRO 6000,
+model weights, BF16 forward autocast, FP32 solver and disabled TF32. Solver
+settings remain 12000 references, temperature 0.01, sigma 0, chunk 4096, seed 0.
+One full warmup and three synchronized measured repeats per case:
+
+| Scope | Baseline seconds | Direct quaternion seconds | Speedup | Baseline allocated GiB | Direct allocated GiB | Allocated change |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Solver only | 1.148190 | 0.845820 | 1.357x | 7.358998 | 7.359059 | +64 KiB |
+| Tracking + rigidity + SE(3) | 1.750014 | 1.431839 | 1.222x | 7.522389 | 7.522450 | +64 KiB |
+
+Time decreases 26.3% for the solver and 18.2% for the full pipeline. Reserved
+peaks are unchanged: 7.568359 GiB solver-only and 8.697266 GiB full pipeline.
+Allocated peaks include resident model weights/inputs. Full timing starts with
+decoded CPU RGB and ends with CPU tracks, visibility, all rigidity embeddings
+and SE(3); initialization and file writing are excluded.
+
+The numerical comparison uses identical cached network outputs and all
+3,245,760 non-source fits, which are finite and valid in both versions:
+
+- Quaternion components are not bitwise identical. Sign-aligned max absolute
+  difference: **4.1723e-7**.
+- Rotation difference max / mean / p99: **4.5923e-5 / 3.0360e-7 / 6.9639e-6
+  degrees**.
+- Translation and validity tensors are **bitwise identical**; translation
+  differences, validity flips and finite-mask mismatches are zero.
+
+Direct export avoids FP32 rounding through R and the matrix-to-quaternion
+conversion. These numbers describe this input and GPU, not universal bitwise
+equivalence or GT tracking accuracy. The established eager-cleanup branch
+`codex/reuse-se3-weights` remains at `326ea1b` while this change is evaluated.

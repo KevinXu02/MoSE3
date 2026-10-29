@@ -168,7 +168,7 @@ def fit_per_pixel_se3(
             tr = dst_mean - (src_mean.unsqueeze(1) @ R.transpose(-2, -1)).squeeze(1)
             sol_ok = sol_ok & torch.isfinite(tr).all(dim=-1)
 
-            quat[t, s:e] = _rotmat_to_quat_wxyz(R)
+            quat[t, s:e] = horn["quat"]
             trans[t, s:e] = tr
             ok[t, s:e] = sol_ok
         del w  # Do not retain the previous chunk's large weight matrix.
