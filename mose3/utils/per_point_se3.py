@@ -9,7 +9,7 @@ from __future__ import annotations
 import torch
 import torch.nn.functional as F
 
-from .se3_fit import weighted_centroids, solve_rotation_horn
+from .se3_fit import solve_rotation_horn
 
 
 def _rotmat_to_quat_wxyz(R: torch.Tensor) -> torch.Tensor:
@@ -102,6 +102,9 @@ def fit_per_pixel_se3(
 
     Returns a dict of CPU tensors: ``quat`` [T, H, W, 4] (wxyz) and ``trans`` [T, H, W, 3] with
     x_t = R(quat) x_query + trans, and ``ok`` [T, H, W] (the fit was well conditioned).
+
+    Query-to-reference weights depend only on the query frame. Reuse each chunk's
+    weights and source centroid across target frames without caching a full P-by-reference matrix.
     """
     assert tracks.shape[:3] == rigidity_emb.shape[:3], (
         f"shape mismatch tracks={tuple(tracks.shape)} emb={tuple(rigidity_emb.shape)}"
@@ -133,23 +136,29 @@ def fit_per_pixel_se3(
 
     inv_temp = 1.0 / max(float(temperature), 1e-6)
 
-    for t in range(T):
-        if t == query_idx:
-            continue
-        ref_dst = tracks[t].reshape(P, 3).to(device).float().index_select(0, ref_idx)
-        for s in range(0, P, chunk_size):
-            e = min(s + chunk_size, P)
-            chunk_emb_n = src_emb_n[s:e]
-            logits = (chunk_emb_n @ ref_emb_n.T) * inv_temp
-            if sigma_px > 0:  # spatial Gaussian on query-frame pixel distance
-                pix = torch.arange(s, e, device=device)
-                dh = (pix // W).float()[:, None] - ref_h[None]
-                dw = (pix % W).float()[:, None] - ref_w[None]
-                logits = logits - (dh * dh + dw * dw) / (2.0 * sigma_px ** 2)
-            w = F.softmax(logits, dim=-1)
-            w = w / (w.sum(dim=-1, keepdim=True).clamp_min(1e-8))
-
-            src_mean, dst_mean, _, _, cov = weighted_centroids(ref_src, ref_dst, w)
+    ref_dst_all = torch.stack([
+        tracks[t].reshape(P, 3).to(device).float().index_select(0, ref_idx)
+        for t in range(T)
+    ])
+    ref_outer = ref_src[None, :, :, None] * ref_dst_all[:, :, None, :]
+    for s in range(0, P, chunk_size):
+        e = min(s + chunk_size, P)
+        chunk_emb_n = src_emb_n[s:e]
+        logits = (chunk_emb_n @ ref_emb_n.T) * inv_temp
+        if sigma_px > 0:  # spatial Gaussian on query-frame pixel distance
+            pix = torch.arange(s, e, device=device)
+            dh = (pix // W).float()[:, None] - ref_h[None]
+            dw = (pix % W).float()[:, None] - ref_w[None]
+            logits = logits - (dh * dh + dw * dw) / (2.0 * sigma_px ** 2)
+        w = F.softmax(logits, dim=-1)
+        w = w / (w.sum(dim=-1, keepdim=True).clamp_min(1e-8))
+        src_mean = w @ ref_src
+        for t in range(T):
+            if t == query_idx:
+                continue
+            dst_mean = w @ ref_dst_all[t]
+            weighted_outer = torch.einsum("qk,kab->qab", w, ref_outer[t])
+            cov = weighted_outer - src_mean.unsqueeze(-1) * dst_mean.unsqueeze(-2)
             horn = solve_rotation_horn(cov, eig_min_gap=1e-4, eig_jitter=1e-6)
             R = horn["R"]
             sol_ok = horn["ok"]

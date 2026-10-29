@@ -71,6 +71,9 @@ python visualize_viser.py --clip outputs/spin --port 8080
 - `python inference.py --help` lists every option. The keys of `predictions.npz` are documented in
   `run_clip` in `inference.py`.
 
+This fork reuses query-frame fitting weights across target frames. See the
+[solver optimization and paired PRO 6000 measurements](docs/solver-weight-reuse.md).
+
 ### In Python
 
 ```python
