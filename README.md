@@ -73,6 +73,8 @@ python visualize_viser.py --clip outputs/spin --port 8080
 
 This fork reuses query-frame fitting weights across target frames. See the
 [solver optimization and paired PRO 6000 measurements](docs/solver-weight-reuse.md).
+It also avoids repeated CUDA scalar uploads and releases temporary affinity
+buffers early; execution remains eager with the original per-frame Horn batches.
 
 ### In Python
 

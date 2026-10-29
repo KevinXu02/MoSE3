@@ -68,3 +68,70 @@ of universal bitwise equivalence.
   are released before measuring this scope.
 - Numerical comparisons and file writing are excluded from timings. The
   optional spatial Gaussian was preserved in code but was off in this run.
+
+## Eager scalar-transfer and buffer-lifetime cleanup
+
+Two additional changes retain the eager solver and its existing output API:
+
+- Use Python scalar operands in the quaternion-sign `torch.where`, preserving
+  the covariance dtype, instead of constructing and uploading two CUDA scalar
+  tensors for every Horn call.
+- Scale private logits and renormalize private weights in place. Release
+  logits after softmax and weights after each source chunk. The second weight
+  normalization is retained. Spatial-Gaussian arithmetic is unchanged; its
+  coordinate temporaries are released after use.
+
+The solver runs under `torch.no_grad()`, and these weight buffers are private
+temporaries. Reference sampling, FP32 precision, covariance arithmetic, both
+per-frame eigensolves, jitter, validity checks and quaternion conversion are
+retained. No compiler, cross-frame Horn batching, packed GEMM or reduced-output
+mode is introduced.
+
+One 4096-by-12000 FP32 buffer occupies 187.5 MiB. Avoiding simultaneous old/new
+buffers and releasing logits reduces local memory demand; the measurements
+below report actual allocator peaks rather than estimating whole-call savings
+from this buffer size.
+
+The paired control is commit `5a8d2c1`, with both original `per_point_se3.py`
+and `se3_fit.py` loaded from frozen snapshots. Each implementation uses the
+same cached network outputs for solver-only timing and numerical comparison.
+Full-pipeline timing retains the entire tracking/visibility/rigidity/SE(3)
+CPU output contract. Inputs, precision, reference pool and repeats match the
+protocol above. Separate profiler passes verify transfer/synchronization counts;
+instrumented times are excluded from latency medians and overlap GPU execution.
+
+In the separate 64-frame profiler passes, pageable H2D copies drop from
+**4410 to 0** and `cudaStreamSynchronize` calls from **8823 to 4413**.
+Both `eigvalsh` and `eigh` remain at 2205 calls each. The synchronization API
+self CPU times are approximately 556.46 / 557.93 ms before / after cleanup;
+fewer calls do not imply proportionally less waiting or a large speedup.
+These instrumented durations overlap device execution and are not a partition
+of unprofiled wall latency.
+
+Quaternion, translation and validity outputs are bitwise identical on the
+matched 50/64-frame inputs, including source identity tensors. All finite
+masks agree and validity flips are zero. The same single 64-frame fit is
+invalid in both implementations. This is agreement on the measured inputs,
+not a universal bitwise or GT tracking-accuracy claim.
+
+### Paired cleanup results
+
+| Frames | Scope | Before / after seconds | Speedup | Before / after allocated peak GiB |
+| ---: | --- | ---: | ---: | ---: |
+| 50 | solver | 2.435165 / 2.392475 | 1.018x | 7.938884 / 7.755290 |
+| 50 | full_pipeline | 4.079710 / 4.033410 | 1.011x | 8.630439 / 8.630439 |
+| 64 | solver | 3.062922 / 3.005426 | 1.019x | 8.139801 / 7.956207 |
+| 64 | full_pipeline | 5.940854 / 5.817977 | 1.021x | 9.422223 / 9.422223 |
+
+Solver allocated peaks decrease by **188 MiB at both lengths**. Reserved
+solver peaks fall from 9.244141 to 8.011719 GiB at 50 frames and from
+9.542969 to 8.310547 GiB at 64 frames. Reserved memory is allocator
+capacity rather than live tensor payload; these are different quantities.
+Full-pipeline allocated peaks remain unchanged. Latency gains are modest
+(about 2% for solver-only); the primary benefits are fewer small transfers
+and lower solver memory, rather than a large end-to-end acceleration.
+
+Every latency sample is uninstrumented; separate 64-frame profiler passes
+precede that length's full-pipeline samples in the same process. All raw
+repeats are retained in the analysis artifacts. Values are one-clip paired
+measurements on one PRO 6000, not a hardware-independent speed guarantee.

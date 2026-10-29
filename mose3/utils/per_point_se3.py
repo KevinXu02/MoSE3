@@ -144,14 +144,17 @@ def fit_per_pixel_se3(
     for s in range(0, P, chunk_size):
         e = min(s + chunk_size, P)
         chunk_emb_n = src_emb_n[s:e]
-        logits = (chunk_emb_n @ ref_emb_n.T) * inv_temp
+        logits = chunk_emb_n @ ref_emb_n.T
+        logits.mul_(inv_temp)
         if sigma_px > 0:  # spatial Gaussian on query-frame pixel distance
             pix = torch.arange(s, e, device=device)
             dh = (pix // W).float()[:, None] - ref_h[None]
             dw = (pix % W).float()[:, None] - ref_w[None]
             logits = logits - (dh * dh + dw * dw) / (2.0 * sigma_px ** 2)
+            del pix, dh, dw
         w = F.softmax(logits, dim=-1)
-        w = w / (w.sum(dim=-1, keepdim=True).clamp_min(1e-8))
+        del logits
+        w.div_(w.sum(dim=-1, keepdim=True).clamp_min(1e-8))
         src_mean = w @ ref_src
         for t in range(T):
             if t == query_idx:
@@ -168,6 +171,7 @@ def fit_per_pixel_se3(
             quat[t, s:e] = _rotmat_to_quat_wxyz(R)
             trans[t, s:e] = tr
             ok[t, s:e] = sol_ok
+        del w  # Do not retain the previous chunk's large weight matrix.
 
     return {
         "quat":  quat.reshape(T, H, W, 4).cpu(),
